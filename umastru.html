@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>U Mastru</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="U Mastru">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f1a14">
+<link rel="manifest" href="umastru.webmanifest">
+<link rel="apple-touch-icon" href="umastru-180.png">
+<link rel="icon" type="image/png" href="umastru-512.png">
+<style>
+  /* Porta d'ingresso: apre il programma Google a tutto schermo, lasciando libere la tacca in alto e la barretta in basso */
+  html, body { margin: 0; height: 100%; background: #0f1a14; overflow: hidden; }
+  iframe { position: fixed; border: 0; left: 0; right: 0; width: 100%;
+           top: env(safe-area-inset-top, 0px); bottom: env(safe-area-inset-bottom, 0px);
+           height: calc(100% - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); background: #0f1a14; }
+  #msg { display: none; color: #e8d9a8; font: 17px/1.5 -apple-system, Helvetica, sans-serif; padding: calc(40px + env(safe-area-inset-top, 0px)) 24px 24px; max-width: 520px; margin: 0 auto; }
+  #msg img { width: 96px; border-radius: 22px; display: block; margin: 0 auto 16px; }
+  #msg h1 { font: 600 24px/1.2 Georgia, serif; color: #d8b468; text-align: center; margin: 0 0 16px; }
+  #msg input { width: 100%; box-sizing: border-box; font-size: 16px; padding: 12px; border-radius: 10px; border: 1px solid #8a7440; background: #16241c; color: #ece6d3; }
+  #msg button { margin-top: 12px; width: 100%; font: 700 17px -apple-system, Helvetica, sans-serif; padding: 14px; border: 0; border-radius: 10px; background: #d8b468; color: #1d2a22; }
+  #err { color: #f0a08a; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div id="msg">
+  <img src="umastru-180.png" alt="">
+  <h1>U Mastru</h1>
+  <p>Incolla qui il link del programma, quello che copi dalla barra in alto (iPhone: Condividi → «Copia»; Android: tieni premuto sull'indirizzo → Copia).</p>
+  <input id="link" type="url" placeholder="https://script.google.com/macros/s/…" autocomplete="off">
+  <button id="vai">Prepara</button>
+  <div id="err"></div>
+  <p>Quando il programma si apre: <b>Android</b> menu ⋮ → «Installa app» (o «Aggiungi a schermata Home» → Installa); <b>iPhone</b> Condividi → «Aggiungi alla schermata Home».</p>
+</div>
+<script>
+  // L'indirizzo del programma NON sta in questa pagina (che è pubblica): arriva nel link salvato sulla schermata Home.
+  // s = il codice dello script Google (AKfy...)
+  var K = 'umastru_link', q = location.search;
+  try { if (q.indexOf('s=') > -1) localStorage.setItem(K, q); else q = localStorage.getItem(K) || q; } catch (e) {}
+  var p = new URLSearchParams(q), s = p.get('s');
+  if (!/^[A-Za-z0-9_-]{20,}$/.test(s || '')) { document.getElementById('msg').style.display = 'block';
+    document.getElementById('vai').onclick = function () {
+      var v = document.getElementById('link').value.trim(), m = v.match(/\/macros\/(?:u\/\d+\/)?s\/([A-Za-z0-9_-]{20,})\/exec(\?[^#]*)?/);
+      if (!m) { document.getElementById('err').textContent = 'Questo non sembra il link giusto: deve contenere script.google.com/macros/s/…/exec'; return; }
+      var n = new URLSearchParams(m[2] || ''); n.set('s', m[1]);
+      location.replace(location.pathname + '?' + n.toString());
+    };
+  }
+  else {
+    p.delete('s');
+    var f = document.createElement('iframe'), resto = p.toString();
+    f.src = 'https://script.google.com/macros/s/' + s + '/exec' + (resto ? '?' + resto : '');
+    f.allow = 'clipboard-write; camera; fullscreen';
+    document.body.appendChild(f);
+  }
+  try { if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js'); } catch (e) {}
+</script>
+</body>
+</html>
