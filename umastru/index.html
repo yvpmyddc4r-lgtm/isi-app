@@ -17,8 +17,7 @@
   /* Porta d'ingresso: apre il programma Google a tutto schermo, lasciando libere la tacca in alto e la barretta in basso */
   html, body { margin: 0; height: 100%; background: #0f1a14; overflow: hidden; }
   iframe { position: fixed; border: 0; left: 0; right: 0; width: 100%;
-           top: env(safe-area-inset-top, 0px);
-           height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); background: #0f1a14; }
+           top: 0; height: 100vh;   /* U Mastru si sistema da solo sotto l'ora e sopra la barretta (safe-area) */ background: #0f1a14; }
   #msg { display: none; color: #e8d9a8; font: 17px/1.5 -apple-system, Helvetica, sans-serif; padding: calc(40px + env(safe-area-inset-top, 0px)) 24px 24px; max-width: 520px; margin: 0 auto; }
   #msg img { width: 96px; border-radius: 22px; display: block; margin: 0 auto 16px; }
   #msg h1 { font: 600 24px/1.2 Georgia, serif; color: #d8b468; text-align: center; margin: 0 0 16px; }
@@ -60,7 +59,7 @@
     // iPhone dalla schermata Home: l'altezza della finestra esclude per sbaglio la barra dell'ora, così restava una fascia vuota in basso
     if (navigator.standalone) {
       var alto = function () { var a = Math.max(screen.width, screen.height), b = Math.min(screen.width, screen.height);
-        f.style.height = 'calc(' + (matchMedia('(orientation: portrait)').matches ? a : b) + 'px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))'; };
+        f.style.height = (matchMedia('(orientation: portrait)').matches ? a : b) + 'px'; };
       alto(); addEventListener('resize', alto); addEventListener('orientationchange', function () { setTimeout(alto, 300); });
     }
   }
