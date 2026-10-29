@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f1a14">
 <link rel="manifest" href="manifest.webmanifest">
+<script>/* iPhone/iPad: senza manifest la Home ricorda il link completo (con ?s= e &d=) */ if (/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) document.querySelector('link[rel="manifest"]').remove();</script>
 <link rel="apple-touch-icon" href="../umastru-180.png">
 <link rel="icon" type="image/png" href="../umastru-512.png">
 <style>
