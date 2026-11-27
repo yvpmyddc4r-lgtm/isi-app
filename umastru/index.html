@@ -59,6 +59,25 @@
     f.src = 'https://script.google.com/macros/s/' + s + '/exec' + (resto ? '?' + resto : '');
     f.allow = 'clipboard-write; camera; fullscreen';
     document.body.appendChild(f);
+    // 27/11 (Salvo): l'iPhone cancella a ogni chiusura la memoria del riquadro Google, così U Mastru riscaricava sempre il programma
+    // («Prendo da Google la versione nuova…»). La copia del programma la tiene questa pagina, che ha una memoria sua che resta.
+    // Risponde solo a U Mastru aperto qui dentro (non ad altre pagine) e la copia vale solo per la stessa versione del Drive.
+    (function () {
+      function db() { return new Promise(function (ok, ko) { var r = indexedDB.open('porta-umastru', 1);
+        r.onupgradeneeded = function () { r.result.createObjectStore('p'); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { ko(r.error); }; }); }
+      function dentro(w) { for (var i = 0; i < 5 && w; i++) { if (w === f.contentWindow) return true; if (w === w.parent) return false; w = w.parent; } return false; }
+      addEventListener('message', function (e) {
+        var d = e.data;
+        if (!d || typeof d !== 'object' || !/^https:\/\/[a-z0-9-]+\.googleusercontent\.com$/.test(e.origin) || !dentro(e.source)) return;
+        if (d.um === 'prog?') {
+          var rispondi = function (m) { e.source.postMessage({ um: 'prog', agg: m && m.agg, testo: m && m.agg === d.agg ? m.testo : null }, e.origin); };
+          db().then(function (b) { var r = b.transaction('p').objectStore('p').get('ultimo');
+            r.onsuccess = function () { rispondi(r.result || null); }; r.onerror = function () { rispondi(null); }; }).catch(function () { rispondi(null); });
+        } else if (d.um === 'prog!' && d.agg && typeof d.testo === 'string') {
+          db().then(function (b) { b.transaction('p', 'readwrite').objectStore('p').put({ agg: d.agg, testo: d.testo }, 'ultimo'); }).catch(function () {});
+        }
+      });
+    })();
     // iPhone dalla schermata Home: l'altezza della finestra esclude per sbaglio la barra dell'ora, così restava una fascia vuota in basso
     if (navigator.standalone) {
       // 30/10: con l'iframe «fisso» l'iPhone lo taglia comunque all'altezza sbagliata (fascia vuota in basso e nomi della barra
